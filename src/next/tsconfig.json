@@ -19,7 +19,8 @@
 			"@components/*": ["./components/*"],
 			"@firebase/*": ["./firebase/*"],
 			"@stores/*": ["./stores/*"],
-			"@styles/*": ["./styles/*"]
+			"@styles/*": ["./styles/*"],
+			"@typings/*": ["./typings/*"]
 		}
 	},
 	"include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],

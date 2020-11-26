@@ -1,7 +1,5 @@
-import { useState, ChangeEvent, FormEvent } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import firebase from 'firebase/app'
-import 'firebase/firestore'
 
 import { firestore } from '@firebase/firebaseFirestore'
 import { wordList } from '@stores/word-store'
@@ -21,42 +19,34 @@ const WordTitle = styled.h1`
 	color: ${({ theme: { color } }) => color};
 `
 
-const WordForm = styled.form``
+const WordMessagesContainer = styled.ul`
+	color: ${({ theme: { color } }) => color};
+`
 
-const InputBox = styled.input``
+const WordMessage = styled.li``
 
-const SubmitButton = styled.input``
+const WordResult = ({ wid }: Props): JSX.Element => {
+	const [messages, setMessages] = useState<WordData[]>([])
 
-const WordId = ({ wid }: Props): JSX.Element => {
-	const [message, setMessage] = useState<string>('')
-
-	const handleMessage = (event: ChangeEvent<HTMLInputElement>) => {
-		const textInput = event.target.value
-
-		setMessage(textInput)
-	}
-
-	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-		event.preventDefault()
-
+	useEffect(() => {
 		firestore
 			.collection('words')
 			.doc(wid)
-			.update({
-				data: firebase.firestore.FieldValue.arrayUnion({
-					message,
-					timestamp: firebase.firestore.Timestamp.fromDate(new Date())
-				} as WordData)
+			.onSnapshot(doc => {
+				const docData = doc.data()
+
+				setMessages(docData.data)
 			})
-	}
+	}, [])
 
 	return (
 		<PageLayout>
 			<WordTitle>{wordList[wid]}</WordTitle>
-			<WordForm onSubmit={handleSubmit}>
-				<InputBox type='text' value={message} onChange={handleMessage} />
-				<SubmitButton type='submit' />
-			</WordForm>
+			<WordMessagesContainer>
+				{messages.map(({ message, timestamp }) => (
+					<WordMessage key={timestamp.toMillis()}>{message}</WordMessage>
+				))}
+			</WordMessagesContainer>
 		</PageLayout>
 	)
 }
@@ -80,4 +70,4 @@ export const getStaticProps: GetStaticProps = async context => {
 	}
 }
 
-export default WordId
+export default WordResult
